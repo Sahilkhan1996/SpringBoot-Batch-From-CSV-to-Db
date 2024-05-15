@@ -18,8 +18,6 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.transaction.PlatformTransactionManager;
-import org.springframework.transaction.interceptor.DefaultTransactionAttribute;
-import org.springframework.transaction.interceptor.TransactionAttribute;
 
 import javax.sql.DataSource;
 
@@ -37,12 +35,12 @@ public class BatchCofig {
 
     @Bean(name = "reader")
     public ItemReader<Employee> createReader() {
-        return new FlatFileItemReaderBuilder<Employee>().name("reader").resource(new ClassPathResource("EmployeesInfo.csv")).delimited().delimiter(",").names("empno", "ename", "salary", "eadd").targetType(Employee.class).build();
+        return new FlatFileItemReaderBuilder<Employee>().name("reader").resource(new ClassPathResource("EmployeesInfo.csv")).delimited().delimiter(",").names("empno", "ename", "eadd","salary").targetType(Employee.class).build();
     }
 
     @Bean(name = "writer")
     public ItemWriter<Employee> createWriter() {
-        return new JdbcBatchItemWriterBuilder<Employee>().dataSource(ds).sql("INSERT INTO EMPLOYEE VALUES(:empno,:empname,:salary,:eadd,:grossSalary,:netSalary").beanMapped().build();
+        return new JdbcBatchItemWriterBuilder<Employee>().dataSource(ds).sql("INSERT INTO employee VALUES(:empno,:empname,:eadd,:salary,:grosssalary,:netsalary)").beanMapped().build();
 
     }
 
@@ -54,11 +52,7 @@ public class BatchCofig {
 
     @Bean(name = "step1")
     public Step createStep1() {
-        return stepBuilderFactory
-                .get("step1").<Employee, Employee>chunk(3)
-                .reader(createReader()).writer(createWriter())
-                .processor(createProcessor())
-                .build();
+        return stepBuilderFactory.get("step1").<Employee, Employee>chunk(3).reader(createReader()).writer(createWriter()).processor(createProcessor()).build();
 
 
     }
@@ -66,15 +60,6 @@ public class BatchCofig {
     @Bean(name = "job1")
     public Job createJob1() {
         return jobFactory.get("job1").incrementer(new RunIdIncrementer()).start(createStep1()).build();
-    }
-
-    // Method to define default transaction attributes
-    public TransactionAttribute getDefaultTransactionAttribute() {
-        DefaultTransactionAttribute attribute = new DefaultTransactionAttribute();
-        attribute.setPropagationBehaviorName("PROPAGATION_REQUIRED");
-        attribute.setIsolationLevelName("ISOLATION_READ_COMMITTED");
-        // Set other attributes as needed
-        return attribute;
     }
 
 

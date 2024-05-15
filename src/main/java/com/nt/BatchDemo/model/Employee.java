@@ -1,16 +1,18 @@
 package com.nt.BatchDemo.model;
 
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Data
+@AllArgsConstructor
+@NoArgsConstructor
 public class Employee {
 
     private Integer empno;
     private String empname;
-    private String empaddrs;
     private Float salary;
-    private Float grossSalary;
-    private Float netSalary;
-
-
+    private String eadd;
+    private Float grosssalary;
+    private Float netsalary;
 }
